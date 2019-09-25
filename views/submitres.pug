@@ -1,0 +1,56 @@
+mixin reportit
+    p='Your submission earned ' + grade + '.'
+    if reportable
+        p='Click the button below to report your grade.'
+        p
+            a(href='/gradereport')
+                button(type='button' class='btn btn-primary')='Report Your Grade '
+                    span(class='badge badge-light')=grade
+        p Note: It will override your current grade!
+    else
+        p='You should earn 100% to report your grade.'
+
+h3='Result'
+if passed
+    div(id='output' class='alert alert-success')
+        h4=result
+        +reportit
+else
+    div(id='output' class='alert alert-danger')
+        h4=result
+        +reportit
+
+if errors.length > 0
+    div(id='diverrors')
+        h3='Error'
+        p(id='errors' class='txtfile')
+            | !{errors}
+if time !== undefined
+    div(id='divtime')
+        h3='Execution Time'
+        p(id='time')=time + 'ms'
+if testcases !== null
+    h3='Test Cases'
+    each testcase in testcases
+        div(id='divfiles' class='card')
+            div(id='divfiles0header' class='card-header')
+                h4= 'Case #' + testcase.id + ' '
+                    if testcase.passed
+                        span(class='badge badge-success')=' Passed '
+                    else
+                        span(class='badge badge-danger')=' Failed '
+                    span(class='badge badge-light')=' (' + testcase.weight + ')'
+            div(id='divfiles'+testcase.id class='card-body')
+                p='Standard Input'
+                div(id='filein'+testcase.id class='txtfile txtin')
+                    span
+                        | !{testcase.in}
+                p='Standard Output from Your Code'
+                div(id='fileout'+testcase.id class='txtfile txtout')
+                    span
+                        | !{testcase.out}
+                p='Expected Standard Output (Answer)'
+                div(id='fileans'+testcase.id class='txtfile txtans')
+                    span
+                        | !{testcase.ans}
+

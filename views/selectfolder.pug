@@ -1,0 +1,14 @@
+extends layout.pug
+block content
+  div(class='container mymain')
+    h3= 'Canvas Assignment Information'
+    ul
+        li= 'Course: ' + coursename + ' (' + courseid + ')'
+        li= 'Assignment: ' + assignmentname + ' (' + assignmentid + ')'
+
+    h3= 'Choose Target Assignment Directory'
+    ul
+        for dir in dirs
+            li
+                a(href='/assignmentlink/'+dir)= dir
+    

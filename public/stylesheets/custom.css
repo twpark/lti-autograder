@@ -1,0 +1,38 @@
+.carousel {
+    height: 500px;
+    margin-bottom: 60px;
+    width:80%;
+    max-width:600px;
+}
+
+.img-t {
+    width:20%;
+    max-width:225px;
+}
+
+.mymain {
+    width:80%;
+    max-width:900px;
+}
+
+.ekko-lightbox-nav-overlay a {
+    color: #495057;
+    font-size: 50px;
+}
+
+.txtfile {
+    max-width:700px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: monospace;
+    padding: 3px;
+    font-size: large;
+}
+
+p {
+    margin-bottom: 0.5rem;
+}
+
+h3 {
+    margin-top: 1rem;
+}

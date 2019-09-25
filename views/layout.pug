@@ -1,0 +1,39 @@
+doctype html
+html
+  head
+    title= title
+    link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T", crossorigin="anonymous")
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css')
+    style= 'body { background: url(/images/cream_dust.png) repeat 0 0;}'
+    link(rel='stylesheet', href='/stylesheets/bootstrap/css/bootstrap-responsive.css')
+    style
+      include ../public/stylesheets/custom.css
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#">Disabled</a>
+          </li>
+    script(src='https://code.jquery.com/jquery.js')
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js", integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM", crossorigin="anonymous")
+    //script(src='https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.js')
+
+  body
+    div(class='navbar navbar-expand flex-column flex-md-row navbar-dark bg-dark flex-column')
+      a(class='navbar-brand' href='#')= title
+      div(class="collapse navbar-collapse")
+        ul(class="navbar-nav mr-auto")
+          li(class="nav-item active")
+            a(class="nav-link" href='#')= username + '@spu'
+          li(class="nav-item")
+            a(class="nav-link" href='#')= 'alpha version'
+
+    div(class='container mymain')
+      block content
+    
+    block script

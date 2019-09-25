@@ -1,0 +1,66 @@
+html
+  head
+    title= title
+    link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T", crossorigin="anonymous")
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css')
+    style= 'body { padding-top: 60px; background: url(/images/cream_dust.png) repeat 0 0;}'
+    link(rel='stylesheet', href='/stylesheets/bootstrap/css/bootstrap-responsive.css')
+    style
+      include ../public/stylesheets/custom.css
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#">Disabled</a>
+          </li>
+
+  body
+    div(class='navbar navbar-expand-md navbar-dark bg-dark fixed-top')
+      a(class='navbar-brand' href='#')= title
+      div(class="collapse navbar-collapse")
+        ul(class="navbar-nav mr-auto")
+          li(class="nav-item active")
+            a(class="nav-link" href='#')= 'for ' + username + '@spu'
+          li(class="nav-item")
+            a(class="nav-link" href='#')= 'alpha version'
+
+    div(class='container text-center mymain')
+      h2= message
+      p(class='lead')= 'Click thumbnails to enlarge and navigate. Click filename to open in a new tab.'
+      div(class='row')
+        for item in files
+          div(class="img-t col-md-4")
+            a(href=item.path data-gallery="mygal" data-toggle='lightbox' data-max-width="850")
+              img(src=item.path class="img-fluid")
+            a(href='/test1' + item.path target="_blank")
+              p(class="text-center")=item.file
+
+    script(src='https://code.jquery.com/jquery.js')
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js", integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM", crossorigin="anonymous")
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.js')
+    script(type="text/javascript").
+      $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+                event.preventDefault();
+                $(this).ekkoLightbox();
+            });
+
+
+
+//-    h2= CourseID
+//-    h2= userID
+//-    h2= UserRole
+//-    h2= FulllogTitle
+//-    code= Fulllog
+	  
+    
+//-    style
+//-      include ../public/stylesheets/style.css
+    
+    
+    
+//- https://getbootstrap.com/docs/4.0/components/carousel/

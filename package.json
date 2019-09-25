@@ -1,0 +1,26 @@
+{
+  "name": "SUPPORT_LTI",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "busboy": "^0.3.1",
+    "diff": "^4.0.1",
+    "directory-tree": "^2.2.4",
+    "express": "^3.21.2",
+    "fs": "0.0.1-security",
+    "ims-lti": "^3.0.2",
+    "jade": "^1.11.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.11",
+    "marked": "*",
+    "mongodb": "^3.3.2",
+    "pug": "^2.0.3",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
+    "session": "^0.1.0"
+  }
+}

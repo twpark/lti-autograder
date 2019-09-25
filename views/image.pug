@@ -1,0 +1,33 @@
+html
+  head
+    title= filepath
+    <link type="text/css" rel="stylesheet" href="/css/theme-dark/annotorious-dark.css" />
+    <script type="text/javascript" src="/annotorious.min.js"></script>
+    <script src="/anno-fancybox.min.js"></script>
+    <script src="/mytest.js"></script>
+
+    script.
+      anno.addPlugin('FancyBoxSelector', { activate: true });
+      anno.addHandler('onAnnotationCreated', myTestfunction1);
+
+
+  body
+    div(class='container text-center mymain')
+      img(src=filepath class="img-fluid annotatable" width='900px')
+
+
+
+
+//-    h2= CourseID
+//-    h2= userID
+//-    h2= UserRole
+//-    h2= FulllogTitle
+//-    code= Fulllog
+	  
+    
+//-    style
+//-      include ../public/stylesheets/style.css
+    
+    
+    
+//- https://getbootstrap.com/docs/4.0/components/carousel/

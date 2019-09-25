@@ -1,0 +1,160 @@
+extends layout.pug
+block content
+  h3= 'Instruction'
+  div(id='instruction' class='card')
+    div(id='instructionbody' class='card-body')!= instruction
+
+  h3= 'Submission'
+  form(id='uploadForm' enctype='multipart/form-data')
+    input(type='hidden' value='7' id='langid')
+    ul
+      for item in submissionfiles
+        li
+          p= item + ': '
+            input(type='file' name='files')
+    //input(type='submit' value='Submit' id='sendddd')
+    button(type='button' class="btn btn-primary" id='send')= 'Submit'
+  
+  div(id='divoutput')
+
+block script
+  script(src='/diff.js')
+  script(type="text/javascript").
+    //COMPILE USER GIVEN CODE
+    $('#send').on('click', function() {
+        $("#send").addClass('disabled');
+        $("#send").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...');
+        $("#divoutput").html('');
+
+        var formData = new FormData(document.getElementById('uploadForm'))
+        //console.log(formData.get('files'));
+
+        $.ajax({
+            type: "POST",
+            url: '/submit',
+            data: formData,
+            success: function(data, error, xhr) {
+              console.log(data);
+              $("#send").removeClass('disabled');
+              $("#send").html('Submit');
+
+              $("#divoutput").html(data);
+
+              /*
+              $("#divoutput").html('<h3>Result</h3>');
+              if (data.passed) {
+                $("#divoutput").append('<div id="output" class="alert alert-success">' + data.output + '</div>');
+              }
+              else {
+                $("#divoutput").append('<div id="output" class="alert alert-danger">' + data.output + '</div>');
+              }
+
+              if (data.errors != null && data.errors != '') {
+                $("#divoutput").append('<div id="diverrors"><h3>Error</h3><p id="errors" class="txtfile">'
+                  + data.errors.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</p></div>');
+              }
+
+              if (data.time != null) {
+                $("#divoutput").append('<div id="divtime"><h3>Execution Time</h3><p id="time">'
+                  + data.time + ' milliseconds</p></div>');
+              }
+
+              if (data.files != null) {
+                $("#divoutput").append('<h3>Test Cases</h3>');
+                $("#divoutput").append('<div id="divfiles" class="card"></div>');
+                for(var i = 0; i < data.files.size; i++) {
+                  var badge = '';
+                  if (data.files.pass[i])
+                    badge = '<span class="badge badge-success"> Passed </span>';
+                  else
+                    badge = '<span class="badge badge-danger"> Failed </span>';
+                  
+                  var divname = 'divfiles' + i;
+                  $("#divfiles").append('<div id="' + divname + 'header" class="card-header">'
+                    + 'Case #' + (i+1) + ' ' + badge + '</div>');
+
+                  $("#divfiles").append('<div id="' + divname + '" class="card-body"></div>')
+
+                  $("#" + divname).append('Standard Input');
+                  $("#" + divname).append('<div id = "filein' + i + '" class = "txtfile txtin"></div>');
+
+                  $("#" + divname).append('Output from Your Code');
+                  $("#" + divname).append('<div id = "fileout' + i + '" class = "txtfile txtout"></div>');
+
+                  $("#" + divname).append('Expected Output');
+                  $("#" + divname).append('<div id = "fileans' + i + '" class = "txtfile txtans"></div>');
+
+                  if (data.files.in[i] != null) {
+                    $("#filein"+i).append('<span>' + data.files.in[i].replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>');
+                  }
+                  else {
+                    $("#filein"+i).append('<span>[BLANK]</span>');
+                  }
+                  if (data.files.ans[i] != null) {
+                    //$("#fileans"+i).append('<span>' + data.files.ans[i].replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>');
+                  }
+                  if (data.files.out[i] != null) {
+                    //$("#fileout"+i).append('<span>' + data.files.out[i].replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>');
+                  }
+
+                  var diff = Diff.diffChars(data.files.ans[i], data.files.out[i]);
+                  var ans = $("#fileans"+i);
+                  var out = $("#fileout"+i);
+
+                  diff.forEach(function(part){
+                    // green for additions, red for deletions
+                    // grey for common parts
+                    
+                    if (part.added) {
+                      var style1 = 'color: red; background-color: yellow;';
+                      out.append('<span style="' + style1 + '">'
+                        + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>');
+                    }
+                    else if (part.removed) {
+                      // only ans
+                      var style1 = 'color: red; background-color: yellow;';// : 'color: black';
+                      ans.append('<span style="' + style1 + '">'
+                        + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>');
+                    }
+                    else {
+                      // both
+                      ans.append('<span style="color: black;">'
+                        + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>');
+                      out.append('<span style="color: black;">'
+                        + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>');
+                    }
+                  });
+                }
+              }
+              */
+            },
+            error: function (data) {
+              console.log('Error:', data);
+              document.getElementById("error").innerHTML = data.error;
+            },
+            processData: false,
+            contentType: false
+        })
+
+        //- $.post("/submit", formData, function(data, error, xhr) {
+        //-     document.getElementById("output").innerHTML = data.output;
+        //- });
+    });
+
+    
+
+
+
+    //- h2= CourseID
+    //- h2= userID
+    //- h2= UserRole
+    //- h2= FulllogTitle
+    //- code= Fulllog
+  
+    
+//-    style
+//-      include ../public/stylesheets/style.css
+    
+    
+    
+//- https://getbootstrap.com/docs/4.0/components/carousel/

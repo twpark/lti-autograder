@@ -1,0 +1,28 @@
+9/13
+- luke 에서 작업중 /home/twp@spu.local/compilebox/API
+- solo 에서 동작 확인 중. 
+- compilebox 는 작동완료 (c++ 와 python)
+9/16
+- 파일업로드 및 VM과 연결부분
+  - busboy 로 파일 업로드 가능.
+  - 숙제폴더 정보파일과 업로드된 파일명 대조하는 부분 완료
+    - lowercase 로 만드는것 만들어야할듯
+  - (9/18 done) 파일 넣어서 컴파일후 결과 전송하는 부분 해야함.
+  - Todo: output diff 를 보여줘야함.
+  - instructor 용 모범답안 제작/확인 인터페이스가 있으면 좋겠음?
+- 숙제폴더 (테스팅, 모범답안 비교용)
+  - 2단 폴더 구조로 숙제 정보를 저장
+  - info.json 에 파일정보가 있고
+  - 기본 instruction.md 가 instruction markdown file 임. (첫페이지에 보여줌)
+
+이후 할일:
+- luke 에 hw return box 대몬 따로 돌릴것..
+9/19
+https://trello.com/b/shlVHVX1/autograder
+trello 에서 tracking.
+
+- 파일 업로드 (다양한것) 만드는 중. https://www.dropzonejs.com/
+  - 각 숙제별로 필요파일 이름들을 정확하게 쓰게 하고 그 파일들만 업로드 받도록
+  - 드래그/드롭 후 버튼눌러서 업로드하면 결과 뜨도록
+  - 이건 나중에 하는걸로... 넘 복잡
+  - 파일들 여러개가 따로 올라가 버리는 상황을 핸들하기가 어려움.
