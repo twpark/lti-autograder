@@ -9,6 +9,8 @@ mixin reportit
         p Note: It will override your current grade!
     else
         p='You should earn 100% to report your grade.'
+    if instructor
+        p='FYI, an instructor cannot report a grade.'
 
 h3='Result'
 if passed

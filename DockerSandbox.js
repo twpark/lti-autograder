@@ -6,6 +6,7 @@
         *Revised on: 30th June 2014 (Changed the way errors are logged on console, added language name into error messages)
 */
 
+var debug = true;
 
 /**
          * @Constructor
@@ -94,7 +95,7 @@ DockerSandbox.prototype.prepare = async function(success)
             iofiles += "\n"
         }
         cmd += this.path + this.folder;
-        console.log(cmd);
+        if (debug) console.log(cmd);
         await exec(cmd);
 
         await fsp.writeFile(sandbox.path + sandbox.folder  +"/iofiles", iofiles);
@@ -103,14 +104,14 @@ DockerSandbox.prototype.prepare = async function(success)
         var submitted_filenames = Object.keys(this.submitted_files);
         for(var i in submitted_filenames) {
             await fsp.writeFile(sandbox.path + sandbox.folder  +"/" + submitted_filenames[i], this.submitted_files[submitted_filenames[i]])
-            console.log("Writing " + sandbox.path + sandbox.folder  +"/" + submitted_filenames[i] + "...");
+            if (debug) console.log("Writing " + sandbox.path + sandbox.folder  +"/" + submitted_filenames[i] + "...");
         }
         
         //await fsp.writeFile(sandbox.path + sandbox.folder+"/" + sandbox.file_name, sandbox.code)
 
         //console.log(sandbox.langName+" file was saved!");
 
-        console.log("exec: " + "chmod 777 \'" + sandbox.path + sandbox.folder + "/" + submitted_filenames[i] + "\'");
+        if (debug) console.log("exec: " + "chmod 777 \'" + sandbox.path + sandbox.folder + "/" + submitted_filenames[i] + "\'");
         await exec("chmod 777 \'" + sandbox.path + sandbox.folder + "/" + submitted_filenames[i] + "\'")
         
         //await fsp.writeFile(sandbox.path + sandbox.folder+"/inputFile", sandbox.stdin_data)
@@ -152,11 +153,11 @@ DockerSandbox.prototype.execute = async function(success)
     //var st = this.path+'DockerTimeout.sh ' + this.timeout_value + 's -u mysql -e \'NODE_PATH=/usr/local/lib/node_modules\' -i -t -v  "' + this.path + this.folder + '":/usercode ' + this.vm_name + ' /usercode/script.sh ' + this.compiler_name + ' ' + this.file_name + ' ' + this.output_command+ ' ' + this.extra_arguments;
     
     //log the statement in console
-    console.log(st);
+    if (debug) console.log(st);
 
     //execute the Docker, This is done ASYNCHRONOUSLY
     exec(st);
-    console.log("------------------------------")
+    if (debug) console.log("------------------------------")
     //Check For File named "completed" after every 1 second
     var intid = setInterval(async function() 
         {
@@ -175,25 +176,25 @@ DockerSandbox.prototype.execute = async function(success)
                 // if readfile was successful:
                 if (myC < sandbox.timeout_value) 
                 {
-                    console.log("DONE")
+                    if (debug) console.log("DONE")
                     //check for possible errors
                     try {
                         data2 = await fsp.readFile(sandbox.path + sandbox.folder + '/errors', 'utf8');
                         if(!data2)
                             data2="";
 
-                        console.log("Error file: ");
-                        console.log(data2);
+                        if (debug) console.log("Error file: ");
+                        if (debug) console.log(data2);
 
-                        console.log("Main File");
-                        console.log(data);
+                        if (debug) console.log("Main File");
+                        if (debug) console.log(data);
     
                         var lines = data.toString().split('*-COMPILEBOX::ENDOFOUTPUT-*');
                         data=lines[0];
                         time=lines[1];
     
-                        console.log("Time: ");
-                        console.log(time);
+                        if (debug) console.log("Time: ");
+                        if (debug) console.log(time);
     
                     }
                     catch (err) {
@@ -215,7 +216,7 @@ DockerSandbox.prototype.execute = async function(success)
                         if (!data) data = "";
 
                         data += "\nExecution Timed Out";
-                        console.log("Timed Out: "+sandbox.folder+" "+sandbox.langName)
+                        if (debug) console.log("Timed Out: "+sandbox.folder+" "+sandbox.langName)
 
                         data2 = await fsp.readFile(sandbox.path + sandbox.folder + '/errors', 'utf8');
                         if(!data2) data2="";
@@ -224,8 +225,8 @@ DockerSandbox.prototype.execute = async function(success)
                         data=lines[0];
                         time=lines[1];
 
-                        console.log("Time: ");
-                        console.log(time);
+                        if (debug) console.log("Time: ");
+                        if (debug) console.log(time);
                     }
                     catch (err) {
                         console.log(err);
@@ -246,7 +247,7 @@ DockerSandbox.prototype.execute = async function(success)
             catch(err) {
                 // build successful, so read outputs
                 for(var i in sandbox.test_info.stdinfiles) {
-                    console.log('testcase checking #' + i + '...');
+                    if (debug) console.log('testcase checking #' + i + '...');
 
                     var _in = null, _ans = null;
                     try {
@@ -272,18 +273,18 @@ DockerSandbox.prototype.execute = async function(success)
                     }
                     catch(err) {
                         // output file missing
-                        console.log('no output file: ' + sandbox.test_info.answerfiles[i]);
+                        if (debug) console.log('no output file: ' + sandbox.test_info.answerfiles[i]);
                         _out = null;
                     }
                     files.out.push(_out);
 
                     // compare _ans and _out to check if they are same
                     if (_out == _ans) {
-                        console.log('testcase output test: ' + (_out == _ans));
+                        if (debug) console.log('testcase output test: ' + (_out == _ans));
                         files.pass.push(_out == _ans);
                     }
                     else {
-                        console.log('test case failed');
+                        if (debug) console.log('test case failed');
                         files.pass.push(false);
                         passed = false;
                         message = 'Test case failed';
@@ -296,8 +297,8 @@ DockerSandbox.prototype.execute = async function(success)
             success(passed,message,files,time,data2);
 
             //now remove the temporary directory
-            console.log("ATTEMPTING TO REMOVE: " + sandbox.folder);
-            console.log("------------------------------")
+            if (debug) console.log("ATTEMPTING TO REMOVE: " + sandbox.folder);
+            if (debug) console.log("------------------------------")
             exec("rm -r " + sandbox.folder);
 
             

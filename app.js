@@ -8,6 +8,15 @@ var http = require('http')
 var fs = require('fs')
 var mongo = require('mongodb');
 var MongoClient = mongo.MongoClient;
+var dboption = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+};
+
+const options = {
+  key: fs.readFileSync('ssl/key.pem'),
+  cert: fs.readFileSync('ssl/luke.cs.spu.edu/star_spu_edu.crt')
+};
 
 var express = require('express')
 var app = express()
@@ -65,15 +74,16 @@ app.get('/test1/:userId/:fileName', function (req, res, next) {
 });
 
 app.get('/initiateDB', function(req, res, next) {
+  accesslogwithdate('InitiateDB', req);
   var url = "mongodb://localhost:27017/autograder";
-  MongoClient.connect(url, function(err, db) {
+  MongoClient.connect(url, dboption, function(err, db) {
     if (err) throw err;
     console.log("Database created!");
     db.close();
   });
   
   url = "mongodb://localhost:27017/";
-  MongoClient.connect(url, function(err, db) {
+  MongoClient.connect(url, dboption, function(err, db) {
     if (err) throw err;
     var dbo = db.db("autograder");
     dbo.createCollection("assignments", function(err, res) {
@@ -109,10 +119,14 @@ app.post('/submit', function(req, res) {
     // 128kb file size limit
   });
 
+  var sizelimitexceeded = false;
   busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-    console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+    // console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
     file.on('data', function(data) {
-      console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+      // console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
+      if (sizelimitexceeded)
+        return;
+
       if(files[filename] == null) {
         files[filename] = data;
       }
@@ -121,18 +135,19 @@ app.post('/submit', function(req, res) {
       }
     });
     file.on('limit', function(){
-      console.log('Size limit exceeded');
+      // console.log('Size limit exceeded');
+      sizelimitexceeded = true;
     });
 
     file.on('end', function() {
-      console.log('File [' + fieldname + '] Finished');
+      // console.log('File [' + fieldname + '] Finished');
     });
   });
   busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
-    console.log('Field [' + fieldname + ']: value: ' + inspect(val));
+    // console.log('Field [' + fieldname + ']: value: ' + inspect(val));
   });
   busboy.on('finish', function() {
-    console.log('submit: done parsing form, ' + Object.keys(files).length + ' files received');
+    // console.log('submit: done parsing form, ' + Object.keys(files).length + ' files received');
 
     // check files
     // var msg = 'files received: '
@@ -144,7 +159,12 @@ app.post('/submit', function(req, res) {
 
     missingFiles = testinfo.submissionfiles.filter(x => !Object.keys(files).includes(x));
 
-    if (missingFiles.length > 0) {
+    if (sizelimitexceeded) {
+      msg = 'File limit exceeded (<100kb).';
+      res.json({ passed: false, output: 'File size limit exceeded', errors: msg});
+      res.end();
+    }
+    else if (missingFiles.length > 0) {
       msg = 'The following files are missing: ';
       for(var i in missingFiles) {
         msg += missingFiles[i]
@@ -168,7 +188,7 @@ app.post('/submit', function(req, res) {
       var timeout_value=5;//Timeout Value, In Seconds
   
       //details of this are present in DockerSandbox.js
-      var sandboxType = new sandBox(timeout_value,path,folder,req.session.testPath,testinfo,files,
+      var sandboxType = new sandBox(timeout_value,path,folder,req.session.testpath,testinfo,files,
         vm_name,arr.compilerArray[language][0],arr.compilerArray[language][1],code,arr.compilerArray[language][2],
         arr.compilerArray[language][3],arr.compilerArray[language][4],stdin);
   
@@ -191,6 +211,8 @@ app.post('/submit', function(req, res) {
         }
 
         var reportable = (totalweights == earnedgrades) ? true : testinfo['allowpartialgrade'];
+        if (req.session.instructor) reportable = false;
+
         req.session.reportable = reportable;
         req.session.totalweights = totalweights;
         req.session.earnedgrades = earnedgrades;
@@ -247,12 +269,14 @@ app.post('/submit', function(req, res) {
           }
         }
         
+        accesslogwithdate('submitted', req);
         res.render('submitres',
           {
             passed: passed,
             result: data,
             errors: err,
             time: exec_time,
+            instructor: req.session.instructor,
             testcases: testcases,
             reportable: reportable,
             totalweights:totalweights,
@@ -271,10 +295,11 @@ app.post('/submit', function(req, res) {
 });
 
 app.get('/assignmentlink/*', function (req, res, next) {
-  console.log(req.params[0]);
-  console.log(req.session);
+  // console.log(req.params[0]);
+  // console.log(req.session);
 
   if (req.session.courseid == null || req.session.assignmentid == null) {
+    accesslogwithdate('AsgmtLinkReqInvalid', req);
     var msg = 'Invalid Link Request - Failed.';
     res.render('deadendmsg',
       {
@@ -287,7 +312,7 @@ app.get('/assignmentlink/*', function (req, res, next) {
 
   var url = "mongodb://localhost:27017/";
 
-  MongoClient.connect(url, function(err, db) {
+  MongoClient.connect(url, dboption, function(err, db) {
     if (err) throw err;
     var dbo = db.db("autograder");
     var myobj = {
@@ -302,7 +327,8 @@ app.get('/assignmentlink/*', function (req, res, next) {
       var msg = 'Course ' + req.session.coursename + ' (' + req.session.courseid + ') - Assignment '
         + '"' + req.session.assignmentname + ' (' + req.session.assignmentid + ')" has been mapped into '
         + 'folder ' + req.params[0] + '. You can close this window now.';
-      res.render('deadendmsg',
+        accesslogwithdate('AsgmtLinkReqSuccess', req);
+        res.render('deadendmsg',
         {
           message: msg,
           header: 'Assignment Linked',
@@ -321,37 +347,43 @@ function dirFlatten(result, dirNode) {
   }
 }
 
+function accesslogwithdate(message, req) {
+  console.log(
+    new Date().toLocaleString('default', {timeZone: 'America/Vancouver'})
+    + ' [' + message + ']'
+    + ' user:' + req.session.username
+    + ' role:' + req.session.roles
+    + ' userid:' + req.session.userid
+    + ' courseid:' + req.session.courseid
+    + ' asgmtid:' + req.session.assignmentid
+    + ' testpath:' + req.session.testpath
+  );
+}
+
 function showAssignment (req, res, next) {
   // User is Auth so pass back when ever we need.
-  var username = req.session.username + (req.session.instructor ? ' (instructor)' : '');
+  var username = req.session.username + (req.session.instructor ? '_(instructor)' : '');
 
-  console.log(
-    '\n' +
-      new Date().toLocaleString('default', {
-        timeZone: 'America/Vancouver'
-      }) +
-      ' test access by ' +
-      username
-  );
+  accesslogwithdate('showAsgmt', req);
 
-  var testPath = req.session.testPath;
+  var testpath = req.session.testpath;
 
-  var infoFile = testPath + 'info.json';
+  var infoFile = testpath + 'info.json';
   var fileContent = fs.readFileSync(infoFile);
   var testinfo = JSON.parse(fileContent);
 
   req.session.testinfo = testinfo;
 
   var instruction = '';
-  console.log('teriouspark: ' + testinfo['instructionfiles']);
+  // console.log('ShowAssignment: ' + testinfo['instructionfiles']);
   for(var i in testinfo['instructionfiles']) {
-    //console.log(testPath + testinfo['instructionfiles'][i])
-    var instFileContent = fs.readFileSync(testPath + testinfo['instructionfiles'][i], "utf8");
+    //console.log(testpath + testinfo['instructionfiles'][i])
+    var instFileContent = fs.readFileSync(testpath + testinfo['instructionfiles'][i], "utf8");
     instruction += marked(instFileContent);
   }
 
-  console.log('teriouspark: ' + testinfo['submissionfiles']);
-  console.log('teriouspark: ' + instruction);
+  // console.log('ShowAssignment: ' + testinfo['submissionfiles']);
+  // console.log('ShowAssignment: ' + instruction);
 
   res.render('submission', {
     title: "SPU CSC Autograder Submission Page",
@@ -368,7 +400,8 @@ function showAssignment (req, res, next) {
 }
 
 app.get('/teriouspark', function (req, res, next) {
-  req.session.username = 'twp_test';
+  req.session.username = 'teriouspark';
+  req.session.roles = 'developer'
   req.session.testpath = './assignments/1229F19/A1/';
 
   showAssignment(req, res, next);
@@ -411,15 +444,15 @@ async function LTIOutcomeReportBack(req, url, sourcedid, grade) {
     parsedBody = await rp(request_promise_native_options);
 
     // POST succeeded...
-    console.log(logMsg + 'Success');
-    console.log(parsedBody);
+    // console.log(logMsg + 'Success');
+    // console.log(parsedBody);
 
     return true;
   }
   catch (err) {
     // POST failed...
-    console.log(logMsg + 'Failed');
-    console.log(err);
+    // console.log(logMsg + 'Failed');
+    // console.log(err);
 
     return false;
   }
@@ -433,6 +466,7 @@ app.get('/gradereport', function (req, res, next) {
       var success = LTIOutcomeReportBack(req);
       
       if (success) {
+        accesslogwithdate('GradeRptSuccess' + req.session.grade, req);
         res.render('deadendmsg', {
           message: 'Your submission grade was successfully reported. You can close this page.',
           header: 'Grade Reported',
@@ -441,6 +475,7 @@ app.get('/gradereport', function (req, res, next) {
         return;
       }
       else {
+        accesslogwithdate('GradeRptFailed' + req.session.grade, req);
         res.render('deadendmsg', {
           message: 'Your submission grade report has failed. Reach out to your instructor.',
           header: 'Grade Report Failed',
@@ -451,6 +486,7 @@ app.get('/gradereport', function (req, res, next) {
     }
   }
 
+  accesslogwithdate('GradeRptInvalid', req);
   res.render('deadendmsg', {
     message: 'Invalid request. Reach out to your instructor.',
     header: 'Grade Report Failed',
@@ -461,32 +497,73 @@ app.get('/gradereport', function (req, res, next) {
 
 app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.json(), function (req, res, next) {
   req.body = _.omit(req.body, '__proto__');
-  console.log(JSON.stringify(req.body, null, 2));
+  // console.log(JSON.stringify(req.body, null, 2));
   if (req.body['oauth_consumer_key'] === ltiKey) {
     var provider = new lti.Provider(ltiKey, ltiSecret);
     // Check is the Oauth  is valid.
     provider.valid_request(req, function (err, isValid) {
       if (err) {
-        console.log('Error in LTI Launch:' + err);
-        res.status(403).send(err);
+        if (err == 'Error: Expired nonce') {
+          accesslogwithdate('LTISessionExpired', req);
+          res.render('deadendmsg',
+          {
+            message: 'LTI Session Expired. '
+              + 'Close this window and open it again from your assignment page.<br><br>'
+              + 'If problem persists, reach out to your course instructor.',
+            header: 'LTI Session Expired',
+            title: 'LTI Session Expired'
+          });
+        }
+        else {
+          accesslogwithdate('LTIError', req);
+          console.log('Error in LTI Launch:' + err);
+          res.render('deadendmsg',
+                    {
+                      message: 'LTI Error. '
+                        + 'Close this window and open it again from your assignment page.<br><br>'
+                        + 'If problem persists, reach out to your course instructor '
+                        + 'with the following error message: <br><br>'
+                        + err,
+                      header: 'LTI Error',
+                      title: 'LTI Error'
+                    });
+          // res.status(403).send(err);
+        }
+        return;
       } else {
         if (!isValid) {
-          console.log('\nError: Invalid LTI launch.');
-          res.status(500).send({ error: 'Invalid LTI launch' });
+          accesslogwithdate('LTIInvalid', req);
+          res.render('deadendmsg',
+          {
+            message: 'Invalid LTI launch. Reach out to your course instructor.',
+            header: 'Invalid LTI launch',
+            title: 'Invalid LTI launch'
+          });
+          // res.status(500).send({ error: 'Invalid LTI launch' });
+          return;
         } else {
           // User is Auth so pass back when ever we need.
           // Instructor check: if(req.body['roles'] == 'Instructor')
           // Student check: if(req.body['roles'] == 'Learner')
           
           // test: checking if there's matching assignment ID
+          req.session.roles = req.body['roles'];
           req.session.instructor = (req.body['roles'] == 'Instructor');
+          req.session.userid = req.body['custom_canvas_user_id'];
+          req.session.courseid = req.body['custom_canvas_course_id'];
+          req.session.coursename = req.body['context_title'];
+          req.session.assignmentid = req.body['custom_canvas_assignment_id'];
+          req.session.assignmentname = req.body['custom_canvas_assignment_title'];
+          req.session.outcomeurl = req.body['lis_outcome_service_url'];
+          req.session.resultdid = req.body['lis_result_sourcedid'];
+    
           var url = "mongodb://localhost:27017/";
           var username = req.body['lis_person_contact_email_primary'].replace(
             '@spu.edu',
             ''
           );
 
-          MongoClient.connect(url, function(err, db) {
+          MongoClient.connect(url, dboption, function(err, db) {
             if (err) throw err;
             var dbo = db.db("autograder");
             var query = {
@@ -495,25 +572,22 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
             };
             dbo.collection("assignments").find(query).toArray(function(err, result) {
               if (err) throw err;
-              console.log(result);
+              // console.log(result);
               db.close();
 
               if (result.length == 0) {
-                console.log("No Match");
+                // console.log("No Match");
                 if(req.session.instructor) { // no match, instructor: let her choose one.
-                  req.session.courseid = req.body['custom_canvas_course_id'];
-                  req.session.coursename = req.body['context_title'];
-                  req.session.assignmentid = req.body['custom_canvas_assignment_id'];
-                  req.session.assignmentname = req.body['custom_canvas_assignment_title'];
 
                   // leaving only directories, dropping 'solution' dir, all files (by giving always false regex for extensions)
                   const tree = dirTree('assignments', { extensions: /(?=a)b/, exclude: /solution/ });
-                  console.log(JSON.stringify(tree, null, 2));
+                  // console.log(JSON.stringify(tree, null, 2));
 
                   var dirs = [];
                   dirFlatten(dirs, tree);
-                  console.log(dirs);
+                  // console.log(dirs);
                   
+                  accesslogwithdate('NoMatchInstructor', req);
                   res.render('selectfolder', {
                     title: "Select Folder for Autograder",
                     // FulllogTitle: 'Full Log: ',
@@ -530,6 +604,7 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
                   });
                 }
                 else { // no mapping, no instructor: dead end. sorry msg
+                  accesslogwithdate('NoMatchStudent', req);
                   res.render('deadendmsg',
                   {
                     message: 'This assignment is not linked yet. Reach out to your course instructor.',
@@ -540,31 +615,19 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
               }
               else { // match exist
                 var assignmentpath = result[0].assignment_folder;
-                req.session.testPath = './' + assignmentpath + '/';
+                req.session.testpath = './' + assignmentpath + '/';
                 req.session.username = username;
-                req.session.outcomeurl = req.body['lis_outcome_service_url'];
-                req.session.resultdid = req.body['lis_result_sourcedid'];
-                req.session.userid = req.body['custom_canvas_user_id'];
-                req.session.courseid = req.body['custom_canvas_course_id'];
-                req.session.assignmentid = req.body['custom_canvas_assignment_id'];
 
                 showAssignment(req, res, next);
               }
             });
           });
-
-          return;
-
-          // reference for later. grade report.
-          if(req.body['roles'] == 'Learner') {
-            LTIOutcomeReportBack(req.body['lis_outcome_service_url'], req.body['lis_result_sourcedid'], '0.50');
-          }
-          
         }
       }
     });
   } else {
-    console.log('LTI KEY NOT MATCHED:');
+    accesslogwithdate('LTIInvalid', req);
+    // console.log('LTI KEY NOT MATCHED:');
     res.render('deadendmsg',
     {
       message: 'LTI Key Not Matched. Reach out to your course instructor with this message.',
@@ -575,8 +638,8 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
 });
 
 // Setup the http server
-var server = http
-  .createServer(app)
+var server = https
+  .createServer(options, app)
   .listen(process.env.PORT || 9090, function () {
     console.log('http server started')
   });
