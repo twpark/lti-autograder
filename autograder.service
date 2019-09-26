@@ -1,0 +1,20 @@
+# copy this to /etc/systemd/system then run the following:
+# sudo systemctl enable autograder.service
+# sudo systemctl start autograder.service
+
+# to see the systemd log, use the following:
+# sudo journalctl -u autograder
+
+[Unit]
+Description=Node.js Autograder Service
+[Service]
+PIDFile=/tmp/autograder-99.pid
+User=[username]
+Group=[groupname]
+Restart=always
+KillSignal=SIGQUIT
+WorkingDirectory=[workingdirectory]
+ExecStart=[executionfilename]
+[Install]
+WantedBy=multi-user.target
+
