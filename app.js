@@ -415,7 +415,7 @@ app.get('/teriouspark', function (req, res, next) {
   req.session.username = 'developer';
   req.session.email = 'dev@dev.dev';
   req.session.roles = 'developer'
-  req.session.testpath = './assignments/1229F19/A1/';
+  req.session.testpath = './' + settings.assignmentpath + 'DEBUG/A1' + '/';
 
   showAssignment(req, res, next);
 });
