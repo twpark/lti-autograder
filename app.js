@@ -62,17 +62,6 @@ app.use(session({
 
 var Busboy = require('busboy')
 
-// var multer = require('multer');
-// var upload = multer({ dest: './uploads/' })
-
-//var storage = multer.memoryStorage()
-//var upload = multer({ storage: storage })
-
-var ltiKey = '7de2ba53fd4af87c19e79d7c5717e3cd98910ec8'
-var ltiSecret = '76186446c84e6e5a70d710cbf14758717a19001d'
-
-const testFolder = './files/'
-
 app.engine('pug', require('pug').__express)
 
 // app.use(express.bodyParser())
@@ -440,8 +429,8 @@ async function LTIOutcomeReportBack(req, url, sourcedid, grade) {
     method: 'POST',
     uri: url,
     oauth: {
-      consumer_key: ltiKey,
-      consumer_secret: ltiSecret,
+      consumer_key: settings.ltiKey,
+      consumer_secret: settings.ltiSecret,
       body_hash: true
     },
     headers: {
@@ -511,8 +500,8 @@ app.get('/gradereport', function (req, res, next) {
 app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.json(), function (req, res, next) {
   req.body = _.omit(req.body, '__proto__');
   // console.log(JSON.stringify(req.body, null, 2));
-  if (req.body['oauth_consumer_key'] === ltiKey) {
-    var provider = new lti.Provider(ltiKey, ltiSecret);
+  if (req.body['oauth_consumer_key'] === settings.ltiKey) {
+    var provider = new lti.Provider(settings.ltiKey, settings.ltiSecret);
     // Check is the Oauth  is valid.
     provider.valid_request(req, function (err, isValid) {
       if (err) {

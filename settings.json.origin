@@ -1,6 +1,8 @@
 {
 	"db": "agtest",
 	"assignmentpath": "assignments/",
-	"port": 9090
+	"port": 9090,
+	"ltiKey": "myltikey",
+	"ltiSecret": "ltisecret"
 }
 
