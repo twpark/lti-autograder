@@ -1,0 +1,14 @@
+{
+    "assignmenttitle": "LTI Autograder Test Problem",
+    "language": 7,
+    "instructionfiles": ["instruction.md"],
+    "submissionfiles": ["main.cpp"],
+    "dependencyfiles": [],
+    "makefile": "Makefile",
+    "stdinfiles": ["in1.txt", "in2.txt"],
+    "answerfiles": ["out1.txt", "out2.txt"],
+    "gradeweights": [1, 2],
+    "allowpartialgrade": true,
+    "author": "Taiwoo Park",
+    "license": "MIT"
+}
