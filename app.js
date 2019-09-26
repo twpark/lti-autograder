@@ -3,7 +3,7 @@
 /* jshint sub:true */
 
 var https = require('https');
-var http = require('http')
+var http = require('http');
 
 var fs = require('fs')
 var mongo = require('mongodb');
@@ -17,6 +17,22 @@ const options = {
   key: fs.readFileSync('ssl/key.pem'),
   cert: fs.readFileSync('ssl/luke.cs.spu.edu/star_spu_edu.crt')
 };
+
+var settingsfile = 'settings.json';
+var settingsoriginfile = 'settings.json.origin';
+
+var settings;
+try {
+  // try custom setting if exists
+  console.log("Reading settings.json...");
+  settings = JSON.parse(fs.readFileSync(settingsfile));
+}
+catch (err) {
+  console.log("settings.json not exist, reading .origin ...");
+  settings = JSON.parse(fs.readFileSync(settingsoriginfile));
+}
+
+console.log("Settings: \n" + JSON.stringify(settings, null, 2));
 
 var express = require('express')
 var app = express()
@@ -67,12 +83,6 @@ app.set('view engine', 'pug')
 app.use(express.static('files'))
 app.use(express.static('public'))
 
-app.get('/test1/:userId/:fileName', function (req, res, next) {
-  res.render('image', {
-    filepath: '/' + req.params.userId + '/' + req.params.fileName
-  });
-});
-
 app.get('/initiateDB', function(req, res, next) {
   accesslogwithdate('InitiateDB', req);
   var url = "mongodb://localhost:27017/autograder";
@@ -85,7 +95,7 @@ app.get('/initiateDB', function(req, res, next) {
   url = "mongodb://localhost:27017/";
   MongoClient.connect(url, dboption, function(err, db) {
     if (err) throw err;
-    var dbo = db.db("autograder");
+    var dbo = db.db(settings.db);
     dbo.createCollection("assignments", function(err, res) {
       if (err) throw err;
       console.log("Collection created!");
@@ -314,7 +324,7 @@ app.get('/assignmentlink/*', function (req, res, next) {
 
   MongoClient.connect(url, dboption, function(err, db) {
     if (err) throw err;
-    var dbo = db.db("autograder");
+    var dbo = db.db(settings.db);
     var myobj = {
       custom_canvas_course_id: req.session.courseid,
       custom_canvas_assignment_id: req.session.assignmentid,
@@ -338,11 +348,13 @@ app.get('/assignmentlink/*', function (req, res, next) {
   });  
 });
 
-function dirFlatten(result, dirNode) {
-  result.push(dirNode.path);
+function dirFlatten(result, dirNode, removePrefix) {
+  var _path = dirNode.path.substring(removePrefix.length);
+  if (_path.length > 0)
+    result.push(_path);
   if (dirNode.children.length > 0) {
     dirNode.children.forEach(element => {
-      dirFlatten(result, element);
+      dirFlatten(result, element, removePrefix);
     });
   }
 }
@@ -351,7 +363,7 @@ function accesslogwithdate(message, req) {
   console.log(
     new Date().toLocaleString('default', {timeZone: 'America/Vancouver'})
     + ' [' + message + ']'
-    + ' user:' + req.session.username
+    + ' email:' + req.session.email
     + ' role:' + req.session.roles
     + ' userid:' + req.session.userid
     + ' courseid:' + req.session.courseid
@@ -400,7 +412,8 @@ function showAssignment (req, res, next) {
 }
 
 app.get('/teriouspark', function (req, res, next) {
-  req.session.username = 'teriouspark';
+  req.session.username = 'developer';
+  req.session.email = 'dev@dev.dev';
   req.session.roles = 'developer'
   req.session.testpath = './assignments/1229F19/A1/';
 
@@ -548,6 +561,7 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
           
           // test: checking if there's matching assignment ID
           req.session.roles = req.body['roles'];
+          req.session.email = req.body['lis_person_contact_email_primary'];
           req.session.instructor = (req.body['roles'] == 'Instructor');
           req.session.userid = req.body['custom_canvas_user_id'];
           req.session.courseid = req.body['custom_canvas_course_id'];
@@ -565,7 +579,7 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
 
           MongoClient.connect(url, dboption, function(err, db) {
             if (err) throw err;
-            var dbo = db.db("autograder");
+            var dbo = db.db(settings.db);
             var query = {
               custom_canvas_course_id: req.body['custom_canvas_course_id'],
               custom_canvas_assignment_id: req.body['custom_canvas_assignment_id']
@@ -580,11 +594,11 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
                 if(req.session.instructor) { // no match, instructor: let her choose one.
 
                   // leaving only directories, dropping 'solution' dir, all files (by giving always false regex for extensions)
-                  const tree = dirTree('assignments', { extensions: /(?=a)b/, exclude: /solution/ });
+                  const tree = dirTree(settings.assignmentpath, { extensions: /(?=a)b/, exclude: /solution/ });
                   // console.log(JSON.stringify(tree, null, 2));
 
                   var dirs = [];
-                  dirFlatten(dirs, tree);
+                  dirFlatten(dirs, tree, settings.assignmentpath);
                   // console.log(dirs);
                   
                   accesslogwithdate('NoMatchInstructor', req);
@@ -614,8 +628,8 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
                 }
               }
               else { // match exist
-                var assignmentpath = result[0].assignment_folder;
-                req.session.testpath = './' + assignmentpath + '/';
+                var _path = result[0].assignment_folder;
+                req.session.testpath = './' + settings.assignmentpath + _path + '/';
                 req.session.username = username;
 
                 showAssignment(req, res, next);
@@ -640,6 +654,6 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
 // Setup the http server
 var server = https
   .createServer(options, app)
-  .listen(process.env.PORT || 9090, function () {
-    console.log('http server started')
+  .listen(process.env.PORT || settings.port, function () {
+    console.log('Server started at port ' + settings.port)
   });

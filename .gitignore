@@ -10,6 +10,8 @@ files/
 temp/
 ssl/
 
+settings.json
+
 .settings/
 .sublime-project
 .tern-project
