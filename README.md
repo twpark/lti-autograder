@@ -13,3 +13,7 @@ node.js (+ docker) based autograder with LTI+OAuth support with Canvas
 
 * main execution file: app.js
 
+* Running the system at a port < 1024: do the following with sudo
+ * iptables -t nat -I PREROUTING -p tcp --dport 443 -j REDIRECT --to-ports [yours]
+ * iptables -t nat -I OUTPUT -p tcp -o lo --dport 443 -j REDIRECT --to-ports [yours]
+

@@ -1,5 +1,7 @@
 mixin reportit
     p='Your submission earned ' + grade + '.'
+    if instructor
+        p='FYI, an instructor cannot report a grade.'
     if reportable
         p='Click the button below to report your grade.'
         p
@@ -8,9 +10,7 @@ mixin reportit
                     span(class='badge badge-light')=grade
         p='Note: It will override your existing grade!'
     else
-        p='You should earn 100% to report your grade.'
-    if instructor
-        p='FYI, an instructor cannot report a grade.'
+        p='For this assignment, you should earn 100% to report your grade.'
 
 h3='Result'
 if passed
