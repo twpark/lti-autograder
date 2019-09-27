@@ -47,13 +47,13 @@ cd /usercode
 START=$(date +%s.%2N)
 #Branch 1
 if [ "$output" = "" ]; then
-    exec  1> $"/usercode/logfile.txt"
+	exec  1> $"/usercode/logfile.txt"
 	exec  2> $"/usercode/errors"
 	$compiler #$file -< $"/usercode/in1.txt" #| tee /usercode/output.txt
 #Branch 2
 else
 	#In case of compile errors, redirect them to a file
-    exec  1> $"/usercode/buildlogfile.txt"
+	exec  1> $"/usercode/buildlogfile.txt"
 	exec  2> $"/usercode/errors"
 
 	#exec 2> &1
@@ -96,13 +96,13 @@ else
 		done < $"/usercode/iofiles"
 	#Branch 2b
 	else
-	    exec  1> $"/usercode/logfile.txt"
+		exec  1> $"/usercode/logfile.txt"
 		echo "Build Failure"
 		echo 'x' > "buildfailure"
 		#cp $"/usercode/buildlogfile.txt" $"/usercode/logfile.txt"
 		
-	    #if compilation fails, display the output file	
-	    #cat /usercode/errors.txt
+		#if compilation fails, display the output file	
+		#cat /usercode/errors.txt
 	fi
 fi
 

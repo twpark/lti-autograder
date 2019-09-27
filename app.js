@@ -185,7 +185,7 @@ app.post('/submit', function(req, res) {
       var path=__dirname+"/"; //current working path
       var vm_name='virtual_machine'; //name of virtual machine that we want to execute
       var timeout_value=5;//Timeout Value, In Seconds
-  
+
       //details of this are present in DockerSandbox.js
       var sandboxType = new sandBox(timeout_value,path,folder,req.session.testpath,testinfo,files,
         vm_name,arr.compilerArray[language][0],arr.compilerArray[language][1],code,arr.compilerArray[language][2],
@@ -233,34 +233,41 @@ app.post('/submit', function(req, res) {
             thiscase.passed = files.pass[i];
             thiscase.id = i+1;
             thiscase.weight = 'Weight: ' + (Math.round(testinfo.gradeweights[i] / totalweights * 1000) / 10) + '%';
+            console.log(JSON.stringify(files, null, 2));
             thiscase.in = files.in[i].replace(/(?:\r\n|\r|\n)/g, '<br>');
             var ans = '', out = '';
 
-            var diff = jsdiff.diffChars(files.ans[i], files.out[i]);
+            if (files.outexist[i]) {
+              var diff = jsdiff.diffChars(files.ans[i], files.out[i]);
             
-            diff.forEach(function(part){
-              // green for additions, red for deletions
-              // grey for common parts
-              
-              if (part.added) {
-                var style1 = 'color: red; background-color: yellow;';
-                out += '<span style="' + style1 + '">'
-                  + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
-              }
-              else if (part.removed) {
-                // only ans
-                var style1 = 'color: red; background-color: yellow;';// : 'color: black';
-                ans += '<span style="' + style1 + '">'
-                  + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
-              }
-              else {
-                // both
-                ans += '<span style="color: black;">'
-                  + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
-                out += '<span style="color: black;">'
-                  + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
-              }
-            });
+              diff.forEach(function(part){
+                // green for additions, red for deletions
+                // grey for common parts
+                
+                if (part.added) {
+                  var style1 = 'color: red; background-color: yellow;';
+                  out += '<span style="' + style1 + '">'
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                }
+                else if (part.removed) {
+                  // only ans
+                  var style1 = 'color: red; background-color: yellow;';// : 'color: black';
+                  ans += '<span style="' + style1 + '">'
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                }
+                else {
+                  // both
+                  ans += '<span style="color: black;">'
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                  out += '<span style="color: black;">'
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                }
+              });
+            }
+            else {
+              ans = files.ans[i].replace(/(?:\r\n|\r|\n)/g, '<br>');
+              out = files.out[i].replace(/(?:\r\n|\r|\n)/g, '<br>');
+            }
 
             thiscase.ans = ans;
             thiscase.out = out;
@@ -404,7 +411,7 @@ app.get('/teriouspark', function (req, res, next) {
   req.session.username = 'developer';
   req.session.email = 'dev@dev.dev';
   req.session.roles = 'developer'
-  req.session.testpath = './' + settings.assignmentpath + 'DEBUG/A1' + '/';
+  req.session.testpath = './' + settings.assignmentpath + 'DEBUG/HELLOWORLD_NOSTDIN' + '/';
 
   showAssignment(req, res, next);
 });
@@ -644,5 +651,5 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
 var server = https
   .createServer(options, app)
   .listen(process.env.PORT || settings.port, function () {
-    console.log('Server started at port ' + settings.port)
+    console.log('Server started at port ' + settings.port + '. Entrypoint: /launch_lti')
   });

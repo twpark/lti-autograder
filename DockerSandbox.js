@@ -158,11 +158,13 @@ DockerSandbox.prototype.execute = async function(success)
     //execute the Docker, This is done ASYNCHRONOUSLY
     exec(st);
     if (debug) console.log("------------------------------")
+
+    var timeout = false;
     //Check For File named "completed" after every 1 second
     var intid = setInterval(async function() 
         {
             //Displaying the checking message after 1 second interval, testing purposes only
-            //console.log("Checking " + sandbox.path+sandbox.folder + ": for completion: " + myC);
+            if (debug) console.log("Checking " + sandbox.path+sandbox.folder + ": for completion: " + myC);
 
             myC = myC + 1;
 
@@ -212,31 +214,38 @@ DockerSandbox.prototype.execute = async function(success)
                 {
                     //Since the time is up, we take the partial output and return it.
                     try {
+                        timeout = true;
+
                         data = await fsp.readFile(sandbox.path + sandbox.folder + '/logfile.txt', 'utf8');
-                        if (!data) data = "";
-
-                        data += "\nExecution Timed Out";
-                        if (debug) console.log("Timed Out: "+sandbox.folder+" "+sandbox.langName)
-
-                        data2 = await fsp.readFile(sandbox.path + sandbox.folder + '/errors', 'utf8');
-                        if(!data2) data2="";
-
-                        var lines = data.toString().split('*---*');
-                        data=lines[0];
-                        time=lines[1];
-
-                        if (debug) console.log("Time: ");
-                        if (debug) console.log(time);
                     }
                     catch (err) {
-                        console.log(err);
+                        if (debug) console.log('no logfile.txt found');
+                        data = '';
                     }
+
+                    data += "\nExecution Timed Out";
+                    if (debug) console.log("Timed Out: "+sandbox.folder+" "+sandbox.langName)
+
+                    try {
+                        data2 = await fsp.readFile(sandbox.path + sandbox.folder + '/errors', 'utf8');
+                    }
+                    catch (err) {
+                        if (debug) console.log('no errors file found');
+                        data2 = '';
+                    }
+
+                    var lines = data.toString().split('*---*');
+                    data=lines[0];
+                    time=lines[1];
+
+                    if (debug) console.log("Time: ");
+                    if (debug) console.log(time);
                 }
             }
 
-            var files = {in: [], ans: [], out: [], pass: [], size: sandbox.test_info.stdinfiles.length};
-            var passed = true;
-            var message = 'Build Successful and Test Passed';
+            var files = {in: [], ans: [], out: [], outexist: [], pass: [], size: sandbox.test_info.stdinfiles.length};
+            var passed = false;
+            var message = 'Undefined';
             try {
                 await fsp.readFile(sandbox.path + sandbox.folder + '/buildfailure', 'utf8');
                 // if open, build failure
@@ -245,6 +254,14 @@ DockerSandbox.prototype.execute = async function(success)
                 files = null;
             }
             catch(err) {
+                if (timeout) {
+                    passed = false;
+                    message = 'Execution Timeout';
+                }
+                else {
+                    passed = true;
+                    message = 'Build Successful and Test Passed';
+                }
                 // build successful, so read outputs
                 for(var i in sandbox.test_info.stdinfiles) {
                     if (debug) console.log('testcase checking #' + i + '...');
@@ -252,10 +269,18 @@ DockerSandbox.prototype.execute = async function(success)
                     var _in = null, _ans = null;
                     try {
                         _in = await fsp.readFile(sandbox.path + sandbox.folder + '/' + sandbox.test_info.stdinfiles[i], 'utf8');
-                        _ans = await fsp.readFile(sandbox.path + sandbox.folder + '/result.' + sandbox.test_info.answerfiles[i], 'utf8');
+                        _ans = await fsp.readFile(sandbox.path + sandbox.folder + '/' + sandbox.test_info.answerfiles[i], 'utf8');
                         _in = _in.replace(/(\r)/gm, '').trim();
                         _ans = _ans.replace(/(\r)/gm, '').trim();
     
+                        if (_in.length == 0) {
+                            _in = '[EMPTY]';
+                        }
+
+                        if (_ans.length == 0) {
+                            _ans = '[EMPTY]';
+                        }
+
                         files.in.push(_in);
                         files.ans.push(_ans);
                     }
@@ -268,14 +293,25 @@ DockerSandbox.prototype.execute = async function(success)
                     try {
                         _out = await fsp.readFile(sandbox.path + sandbox.folder + '/result.' + sandbox.test_info.answerfiles[i] + '.current', 'utf8');
                         _out = _out.replace(/(\r)/gm, '').trim();
+                        
+                        // runtime exception handling
                         _out = _out.replace('/usercode/script.sh: line 107:', '');
                         _out = _out.replace('$output - < $x', '');
+
+                        if (_out.length == 0) {
+                            _out = '[EMPTY]';
+                        }
+
+                        files.outexist.push(true);
                     }
                     catch(err) {
                         // output file missing
                         if (debug) console.log('no output file: ' + sandbox.test_info.answerfiles[i]);
-                        _out = null;
+                        _out = '[NOT EXISTS]';
+
+                        files.outexist.push(false);
                     }
+
                     files.out.push(_out);
 
                     // compare _ans and _out to check if they are same
@@ -286,8 +322,10 @@ DockerSandbox.prototype.execute = async function(success)
                     else {
                         if (debug) console.log('test case failed');
                         files.pass.push(false);
-                        passed = false;
-                        message = 'Test case failed';
+                        if (timeout != true) {
+                            passed = false;
+                            message = 'Test case failed';
+                        }
                     }
                 }
             }

@@ -6,7 +6,7 @@ mixin reportit
             a(href='/gradereport')
                 button(type='button' class='btn btn-primary')='Report Your Grade '
                     span(class='badge badge-light')=grade
-        p Note: It will override your current grade!
+        p='Note: It will override your existing grade!'
     else
         p='You should earn 100% to report your grade.'
     if instructor
