@@ -22,16 +22,16 @@ else
         h4=result
         +reportit
 
-if errors.length > 0
+if errors !== undefined && errors != null && errors.length > 0
     div(id='diverrors')
         h3='Error'
         p(id='errors' class='txtfile')
             | !{errors}
-if time !== undefined
+if time !== null && time !== undefined
     div(id='divtime')
         h3='Execution Time'
         p(id='time')=time + 'ms'
-if testcases !== null
+if testcases !== null && testcases !== undefined
     h3='Test Cases'
     each testcase in testcases
         div(id='divfiles' class='card')

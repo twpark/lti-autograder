@@ -159,9 +159,17 @@ app.post('/submit', function(req, res) {
     missingFiles = testinfo.submissionfiles.filter(x => !Object.keys(files).includes(x));
 
     if (sizelimitexceeded) {
-      msg = 'File limit exceeded (<100kb).';
-      res.json({ passed: false, output: 'File size limit exceeded', errors: msg});
-      res.end();
+      msg = 'File size limit exceeded (<128kb).';
+      res.render('submitres',
+      {
+        passed: false,
+        result: 'File size limit exceeded',
+        errors: msg,
+        instructor: req.session.instructor,
+        reportable: false,
+        earnedgrades: 0,
+        grade: '0%'
+      });
     }
     else if (missingFiles.length > 0) {
       msg = 'The following files are missing: ';
@@ -172,8 +180,16 @@ app.post('/submit', function(req, res) {
       }
       msg += '. Check if you have correctly submitted those files with size > 0.'
       
-      res.json({ passed: false, output: 'Missing File(s)', errors: msg});
-      res.end();
+      res.render('submitres',
+      {
+        passed: false,
+        result: 'Missing File(s)',
+        errors: msg,
+        instructor: req.session.instructor,
+        reportable: false,
+        earnedgrades: 0,
+        grade: '0%'
+      });
     }
     else {
       var language = 7; //req.body.language;
