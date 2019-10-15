@@ -261,13 +261,13 @@ app.post('/submit', function(req, res) {
                 // grey for common parts
                 
                 if (part.added) {
-                  var style1 = 'color: red; background-color: yellow;';
+                  var style1 = 'color: black; background-color: orange; white-space: pre;';
                   out += '<span style="' + style1 + '">'
                     + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
                 }
                 else if (part.removed) {
                   // only ans
-                  var style1 = 'color: red; background-color: yellow;';// : 'color: black';
+                  var style1 = 'color: black; background-color: orange; white-space: pre;';// : 'color: black';
                   ans += '<span style="' + style1 + '">'
                     + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
                 }
@@ -427,7 +427,7 @@ app.get('/teriouspark', function (req, res, next) {
   req.session.username = 'developer';
   req.session.email = 'dev@dev.dev';
   req.session.roles = 'developer'
-  req.session.testpath = './' + settings.assignmentpath + 'DEBUG/HELLOWORLD_NOSTDIN' + '/';
+  req.session.testpath = './' + settings.assignmentpath + 'CSC1230-F19/InClass02-Multiply' + '/';
 
   showAssignment(req, res, next);
 });

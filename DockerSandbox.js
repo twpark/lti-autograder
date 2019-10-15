@@ -77,50 +77,55 @@ DockerSandbox.prototype.prepare = async function(success)
     var fs = require('fs');
     var sandbox = this;
 
-    try {
-        // copy basic payload
-        var cmd = "mkdir "+ this.path + this.folder
-            + " && cp " + this.path + "/Payload/* " + this.path + this.folder
-            + " && chmod 777 "+ this.path + this.folder;
-        await exec(cmd);
+    while (true) {
+        try {
+            // copy basic payload
+            var cmd = "mkdir "+ this.path + this.folder
+                + " && cp " + this.path + "/Payload/* " + this.path + this.folder
+                + " && chmod 777 "+ this.path + this.folder;
+            await exec(cmd);
+    
+            // copy stdin / answer files
+            cmd = "cp " + this.assignment_folder + this.test_info.makefile + " ";
+            var iofiles = "";
+            for(var i in this.test_info.stdinfiles) {
+                cmd += this.assignment_folder + this.test_info.stdinfiles[i] + " "
+                    + this.assignment_folder + this.test_info.answerfiles[i] + " ";
+    
+                iofiles += this.test_info.stdinfiles[i] + " " + this.test_info.answerfiles[i];
+                iofiles += "\n"
+            }
+            cmd += this.path + this.folder;
+            if (debug) console.log(cmd);
+            await exec(cmd);
+    
+            await fsp.writeFile(sandbox.path + sandbox.folder  +"/iofiles", iofiles);
+            console.info("iofiles created");
+    
+            // write submitted files
+            var submitted_filenames = Object.keys(this.submitted_files);
+            for(var i in submitted_filenames) {
+                await fsp.writeFile(sandbox.path + sandbox.folder  +"/" + submitted_filenames[i], this.submitted_files[submitted_filenames[i]])
+                if (debug) console.log("Writing " + sandbox.path + sandbox.folder  +"/" + submitted_filenames[i] + "...");
+            }
+            
+            //await fsp.writeFile(sandbox.path + sandbox.folder+"/" + sandbox.file_name, sandbox.code)
+    
+            //console.log(sandbox.langName+" file was saved!");
+    
+            if (debug) console.log("exec: " + "chmod 777 \'" + sandbox.path + sandbox.folder + "/" + submitted_filenames[i] + "\'");
+            await exec("chmod 777 \'" + sandbox.path + sandbox.folder + "/" + submitted_filenames[i] + "\'")
+            
+            //await fsp.writeFile(sandbox.path + sandbox.folder+"/inputFile", sandbox.stdin_data)
+            //console.log("Input file was saved!");
+            
+            success();
 
-        // copy stdin / answer files
-        cmd = "cp " + this.assignment_folder + this.test_info.makefile + " ";
-        var iofiles = "";
-        for(var i in this.test_info.stdinfiles) {
-            cmd += this.assignment_folder + this.test_info.stdinfiles[i] + " "
-                + this.assignment_folder + this.test_info.answerfiles[i] + " ";
-
-            iofiles += this.test_info.stdinfiles[i] + " " + this.test_info.answerfiles[i];
-            iofiles += "\n"
+            break;
         }
-        cmd += this.path + this.folder;
-        if (debug) console.log(cmd);
-        await exec(cmd);
-
-        await fsp.writeFile(sandbox.path + sandbox.folder  +"/iofiles", iofiles);
-
-        // write submitted files
-        var submitted_filenames = Object.keys(this.submitted_files);
-        for(var i in submitted_filenames) {
-            await fsp.writeFile(sandbox.path + sandbox.folder  +"/" + submitted_filenames[i], this.submitted_files[submitted_filenames[i]])
-            if (debug) console.log("Writing " + sandbox.path + sandbox.folder  +"/" + submitted_filenames[i] + "...");
+        catch (err) {
+            console.log(err);
         }
-        
-        //await fsp.writeFile(sandbox.path + sandbox.folder+"/" + sandbox.file_name, sandbox.code)
-
-        //console.log(sandbox.langName+" file was saved!");
-
-        if (debug) console.log("exec: " + "chmod 777 \'" + sandbox.path + sandbox.folder + "/" + submitted_filenames[i] + "\'");
-        await exec("chmod 777 \'" + sandbox.path + sandbox.folder + "/" + submitted_filenames[i] + "\'")
-        
-        //await fsp.writeFile(sandbox.path + sandbox.folder+"/inputFile", sandbox.stdin_data)
-        //console.log("Input file was saved!");
-        
-        success();
-    }
-    catch (err) {
-        console.log(err);
     }
 }
 
