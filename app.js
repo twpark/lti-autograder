@@ -221,7 +221,7 @@ app.post('/submit', function(req, res) {
         var earnedgrades = 0;
         for(var i in testinfo['gradeweights']) {
           totalweights += testinfo['gradeweights'][i];
-          if (files.pass[i])
+          if (files != null && files.pass[i])
             earnedgrades += testinfo['gradeweights'][i];
         }
 
@@ -427,7 +427,7 @@ app.get('/teriouspark', function (req, res, next) {
   req.session.username = 'developer';
   req.session.email = 'dev@dev.dev';
   req.session.roles = 'developer'
-  req.session.testpath = './' + settings.assignmentpath + 'CSC1230-F19/InClass02-Multiply' + '/';
+  req.session.testpath = './' + settings.assignmentpath + 'CSC1230-F19/HW02MoneyCounter' + '/';
 
   showAssignment(req, res, next);
 });
