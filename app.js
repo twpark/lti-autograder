@@ -119,6 +119,7 @@ app.post('/submit', function(req, res) {
   });
 
   var sizelimitexceeded = false;
+
   busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
     // console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
     file.on('data', function(data) {
@@ -133,6 +134,7 @@ app.post('/submit', function(req, res) {
         files[filename] = Buffer.concat([files[filename], data]);
       }
     });
+
     file.on('limit', function(){
       // console.log('Size limit exceeded');
       sizelimitexceeded = true;
@@ -141,10 +143,43 @@ app.post('/submit', function(req, res) {
     file.on('end', function() {
       // console.log('File [' + fieldname + '] Finished');
     });
+
+    /*
+    file.on('error', function() {
+      var msg = 'File upload error.';
+      res.render('submitres',
+      {
+        passed: false,
+        result: 'File upload error. Send an e-mail to your instructor with your current source code attached',
+        errors: msg,
+        instructor: req.session.instructor,
+        reportable: false,
+        earnedgrades: 0,
+        grade: '0%'
+      });
+    });*/
   });
+
   busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
     // console.log('Field [' + fieldname + ']: value: ' + inspect(val));
   });
+
+  /*
+  busboy.on('error', function() {
+    var msg = 'File upload error.';
+    res.render('submitres',
+    {
+      passed: false,
+      result: 'File upload error. Send an e-mail to your instructor with your current source code attached',
+      errors: msg,
+      instructor: req.session.instructor,
+      reportable: false,
+      earnedgrades: 0,
+      grade: '0%'
+    });
+  });
+  */
+
   busboy.on('finish', function() {
     // console.log('submit: done parsing form, ' + Object.keys(files).length + ' files received');
 
