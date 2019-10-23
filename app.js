@@ -323,7 +323,7 @@ app.post('/submit', function(req, res) {
           }
         }
         
-        accesslogwithdate('submitted', req);
+        accesslogwithdate('submitted' + gradepresentation, req);
         res.render('submitres',
           {
             passed: passed,
