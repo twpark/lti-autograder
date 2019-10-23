@@ -47,11 +47,11 @@ if testcases !== null && testcases !== undefined
                 div(id='filein'+testcase.id class='txtfile txtin')
                     span
                         | !{testcase.in}
-                p='Standard Output from Your Code'
+                p='Standard Output from Your Code (↵: newline)'
                 div(id='fileout'+testcase.id class='txtfile txtout')
                     span
                         | !{testcase.out}
-                p='Expected Standard Output (Answer)'
+                p='Expected Standard Output (Answer, ↵: newline)'
                 div(id='fileans'+testcase.id class='txtfile txtans')
                     span
                         | !{testcase.ans}

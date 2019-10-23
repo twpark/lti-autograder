@@ -295,26 +295,26 @@ app.post('/submit', function(req, res) {
                 if (part.added) {
                   var style1 = 'color: black; background-color: orange; white-space: pre;';
                   out += '<span style="' + style1 + '">'
-                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '↵<br>') + '</span>';
                 }
                 else if (part.removed) {
                   // only ans
                   var style1 = 'color: black; background-color: orange; white-space: pre;';// : 'color: black';
                   ans += '<span style="' + style1 + '">'
-                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '↵<br>') + '</span>';
                 }
                 else {
                   // both
                   ans += '<span style="color: black; white-space: pre;">'
-                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '↵<br>') + '</span>';
                   out += '<span style="color: black; white-space: pre;">'
-                    + part.value.replace(/(?:\r\n|\r|\n)/g, '<br>') + '</span>';
+                    + part.value.replace(/(?:\r\n|\r|\n)/g, '↵<br>') + '</span>';
                 }
               });
             }
             else {
-              ans = files.ans[i].replace(/(?:\r\n|\r|\n)/g, '<br>');
-              out = files.out[i].replace(/(?:\r\n|\r|\n)/g, '<br>');
+              ans = files.ans[i].replace(/(?:\r\n|\r|\n)/g, '↵<br>');
+              out = files.out[i].replace(/(?:\r\n|\r|\n)/g, '↵<br>');
             }
 
             thiscase.ans = ans;
