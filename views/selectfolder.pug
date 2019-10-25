@@ -7,8 +7,7 @@ block content
         li= 'Assignment: ' + assignmentname + ' (' + assignmentid + ')'
 
     h3= 'Choose Target Assignment Directory.'
-    ul
+    div(class='list-group')
         for dir in dirs
-            li
-                a(href='/assignmentlink/'+dir)= dir
+            a(class="list-group-item list-group-item-action" href='/assignmentlink/'+dir)= dir
     

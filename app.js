@@ -403,6 +403,19 @@ function dirFlatten(result, dirNode, removePrefix) {
   }
 }
 
+// currently, just checks info.json..
+function isValidAssignmentDirectory(path) {
+  return fs.existsSync(path + '/info.json');
+}
+
+function validateDirectories(validDirs, dirs) {
+  dirs.forEach(element => {
+    if(isValidAssignmentDirectory(settings.assignmentpath + element)) {
+      validDirs.push(element);
+    }
+  });
+}
+
 function accesslogwithdate(message, req) {
   console.log(
     new Date().toLocaleString('default', {timeZone: 'America/Vancouver'})
@@ -643,6 +656,11 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
 
                   var dirs = [];
                   dirFlatten(dirs, tree, settings.assignmentpath);
+                  
+                  // validate folders
+                  var validDirs = [];
+                  validateDirectories(validDirs, dirs);
+
                   // console.log(dirs);
                   
                   accesslogwithdate('NoMatchInstructor', req);
@@ -654,7 +672,7 @@ app.post('/launch_lti', bodyParser.urlencoded({ extended: true }), bodyParser.js
                     // userID: 'UserID: ' + req.body['user_id'],
                     // UserRole: 'Course Role: ' + req.body['roles'],
                     username: 'Welcome, ' + username,
-                    dirs: dirs,
+                    dirs: validDirs,
                     courseid: req.body['custom_canvas_course_id'],
                     coursename: req.body['context_title'],
                     assignmentid: req.body['custom_canvas_assignment_id'],
