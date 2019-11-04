@@ -4,6 +4,6 @@
 	"port": 9090,
 	"ltiKey": "myltikey",
 	"ltiSecret": "ltisecret"
-	"assignmentpath": "assignments/DEBUG/A1",
+	"testassignmentpath": "assignments/DEBUG/A1",
 }
 
