@@ -281,12 +281,15 @@ app.post('/submit', function(req, res) {
             thiscase.passed = files.pass[i];
             thiscase.id = i+1;
             thiscase.weight = 'Weight: ' + (Math.round(testinfo.gradeweights[i] / totalweights * 1000) / 10) + '%';
-            console.log(JSON.stringify(files, null, 2));
+            //console.log(JSON.stringify(files, null, 2));
             thiscase.in = files.in[i].replace(/(?:\r\n|\r|\n)/g, '<br>');
             var ans = '', out = '';
 
-            if (files.outexist[i]) {
+            if (thiscase.passed == false && files.outexist[i] && files.out[i].length < 1000) {
+              console.log("hello" + files.out[i].length);
+              
               var diff = jsdiff.diffChars(files.ans[i], files.out[i]);
+              console.log("hello" + files.out[i].length);
             
               diff.forEach(function(part){
                 // green for additions, red for deletions
@@ -313,8 +316,12 @@ app.post('/submit', function(req, res) {
               });
             }
             else {
-              ans = files.ans[i].replace(/(?:\r\n|\r|\n)/g, '↵<br>');
-              out = files.out[i].replace(/(?:\r\n|\r|\n)/g, '↵<br>');
+              ans = '<span style="color: black; white-space: pre;">'
+                + files.ans[i].replace(/(?:\r\n|\r|\n)/g, '↵<br>')
+                + '</span>';
+              out = '<span style="color: black; white-space: pre;">'
+              + files.out[i].replace(/(?:\r\n|\r|\n)/g, '↵<br>')
+              + '</span>';
             }
 
             thiscase.ans = ans;
@@ -472,7 +479,7 @@ app.get('/teriouspark', function (req, res, next) {
   req.session.username = 'developer';
   req.session.email = 'dev@dev.dev';
   req.session.roles = 'developer'
-  req.session.testpath = './' + settings.assignmentpath + 'CSC1230-F19/HW02MoneyCounter' + '/';
+  req.session.testpath = settings.testassignmentpath;
 
   showAssignment(req, res, next);
 });

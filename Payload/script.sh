@@ -81,9 +81,11 @@ else
 			fi
 
 			# output file post-processing (removing \r, trailing newline, etc.)
-			sed -e :a -e 's/\r$//' -e '/^\n*$/{$d;N;};/\n$/ba' $y$".current" > $"result."$y$".current"
+			sed -e :a -e 's/\r$//' -e '/^\n*$/{$d;N;};/\n$/ba' $y$".current" > $"result."$y$".current1"
 			#cat $"result."$y
 			#cat $"result."$y$".current"
+
+			head -c 50000 $"result."$y$".current1" > $"result."$y$".current"
 
 			echo 'x' >> $"/usercode/logfile.txt"
 			# output file diff check
