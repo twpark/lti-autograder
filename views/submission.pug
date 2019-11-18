@@ -4,6 +4,19 @@ block content
   div(id='instruction' class='card')
     div(id='instructionbody' class='card-body')!= instruction
 
+  if dependency && dependency.length > 0
+    h3= 'Dependency files'
+    ul
+      for item in dependency
+        li
+          p= item.filename + ' '
+            button(class='btn btn-info btn-sm' type='button' data-toggle='collapse' data-target='#collapse'+item.filename.replace('.', '_') aria-expanded='false' aria-controls='collapse'+item.filename.replace('.', '_'))='Click to Expand'
+            div(class='collapse' id='collapse'+item.filename.replace('.', '_'))
+              div(class='card card-body')
+                pre
+                  code= item.content
+
+
   h3= 'Submission'
   form(id='uploadForm' enctype='multipart/form-data')
     input(type='hidden' value='7' id='langid')

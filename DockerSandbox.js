@@ -85,7 +85,7 @@ DockerSandbox.prototype.prepare = async function(success)
                 + " && chmod 777 "+ this.path + this.folder;
             await exec(cmd);
     
-            // copy stdin / answer files
+            // copy stdin / answer / dependency files
             cmd = "cp " + this.assignment_folder + this.test_info.makefile + " ";
             var iofiles = "";
             for(var i in this.test_info.stdinfiles) {
@@ -95,6 +95,11 @@ DockerSandbox.prototype.prepare = async function(success)
                 iofiles += this.test_info.stdinfiles[i] + " " + this.test_info.answerfiles[i];
                 iofiles += "\n"
             }
+            // add dependency files to the file list of being copied
+            for(var i in this.test_info.dependencyfiles) {
+                cmd += this.assignment_folder + this.test_info.dependencyfiles[i] + " ";
+            }
+
             cmd += this.path + this.folder;
             if (debug) console.log(cmd);
             await exec(cmd);

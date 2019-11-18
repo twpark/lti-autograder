@@ -43,6 +43,9 @@ var lti = require('ims-lti')
 var _ = require('lodash')
 var bodyParser = require('body-parser')
 var marked = require('marked');
+marked.setOptions({
+  langPrefix: ''
+});
 
 var rp = require('request-promise-native');
 
@@ -458,6 +461,13 @@ function showAssignment (req, res, next) {
     instruction += marked(instFileContent);
   }
 
+  var dependency = [];
+  for(var i in testinfo['dependencyfiles']) {
+    //console.log(testpath + testinfo['instructionfiles'][i])
+    var depFileContent = fs.readFileSync(testpath + testinfo['dependencyfiles'][i], "utf8");
+    dependency.push({filename: testinfo['dependencyfiles'][i], content: depFileContent});
+  }
+
   // console.log('ShowAssignment: ' + testinfo['submissionfiles']);
   // console.log('ShowAssignment: ' + instruction);
 
@@ -469,7 +479,7 @@ function showAssignment (req, res, next) {
     // FulllogTitle: 'Full Log: ',
     // Fulllog: JSON.stringify(req.body)
     submissionfiles: testinfo['submissionfiles'],
-    dependencyfiles: testinfo['dependencyfiles'],
+    dependency: dependency,
     instruction: instruction,
     username: username
   });

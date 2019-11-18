@@ -1,0 +1,14 @@
+{
+    "assignmenttitle": "Autograder Unit Test Sample Problem",
+    "language": 7,
+    "instructionfiles": ["instruction.md"],
+    "submissionfiles": ["myfunc.cpp"],
+    "dependencyfiles": ["main.cpp"],
+    "makefile": "Makefile",
+    "stdinfiles": ["in1"],
+    "answerfiles": ["out1"],
+    "gradeweights": [1],
+    "allowpartialgrade": true,
+    "author": "Taiwoo Park",
+    "license": "MIT"
+}

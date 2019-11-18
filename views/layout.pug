@@ -4,6 +4,8 @@ html
     title= title
     link(href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T", crossorigin="anonymous")
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css')
+    link(rel='stylesheet', href='//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/styles/default.min.css')
+
     style= 'body { background: url(/images/cream_dust.png) repeat 0 0;}'
     link(rel='stylesheet', href='/stylesheets/bootstrap/css/bootstrap-responsive.css')
     style
@@ -20,7 +22,10 @@ html
             <a class="nav-link disabled" href="#">Disabled</a>
           </li>
     script(src='https://code.jquery.com/jquery.js')
+    script(src='../syntaxhighlighter.js')
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js", integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM", crossorigin="anonymous")
+    script(src='//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.16.2/build/highlight.min.js')
+    script="hljs.initHighlightingOnLoad();"
     //script(src='https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.js')
 
   body
