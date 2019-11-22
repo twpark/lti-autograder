@@ -288,7 +288,7 @@ app.post('/submit', function(req, res) {
             thiscase.in = files.in[i].replace(/(?:\r\n|\r|\n)/g, '<br>');
             var ans = '', out = '';
 
-            if (thiscase.passed == false && files.outexist[i] && files.out[i].length < 1000) {
+            if (thiscase.passed == false && files.outexist[i] && files.out[i].length < 5000) {
               console.log("hello" + files.out[i].length);
               
               var diff = jsdiff.diffChars(files.ans[i], files.out[i]);
